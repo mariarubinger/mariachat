@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 
+import Api from './Api';
+
 import ChatListItem from './components/ChatListItem';
 import ChatIntro from './components/ChatIntro';
 import ChatWindow from './components/ChatWindow';
+import NewChat from './components/NewChat';
+import Login from './components/Login';
 
 import DonutLargeIcon from '@material-ui/icons/DonutLarge';
 import ChatIcon from '@material-ui/icons/Chat';
@@ -12,30 +16,50 @@ import SearchIcon from '@material-ui/icons/Search';
 
 export default () => {
 
-    const [chatlist, setChatList] = useState([
-        {chatId: 1, title: 'Maria Clara', image: 'https://www.w3schools.com/w3images/avatar5.png'},
-        {chatId: 2, title: 'Maria Clara', image: 'https://www.w3schools.com/w3images/avatar5.png'},
-        {chatId: 3, title: 'Maria Clara', image: 'https://www.w3schools.com/w3images/avatar5.png'},
-        {chatId: 4, title: 'Maria Clara', image: 'https://www.w3schools.com/w3images/avatar5.png'},
-    ]);
+    const [chatlist, setChatList] = useState([]);
     const [activeChat, setActiveChat] = useState({});
-    const [user, setUser] = useState({
-        id: 1234,
-        avatar: 'https://www.w3schools.com/w3images/avatar5.png',
-        name: 'Maria Clara'
-    });
+   /*  const [user, setUser] = useState(null); */
+   const [user, setUser] = useState({
+        id: '4RdcdF6jINXsToURKoh9diWgcgC2',
+        name: 'Maria Clara Rubinger de Sousa',
+        avatar: 'https://scontent.fbsb3-1.fna.fbcdn.net/v/t1.0-9/106919151_4069551136451879_5607232725786716327_n.jpg?_nc_cat=100&_nc_sid=09cbfe&_nc_ohc=V8Q_4Kwe0QwAX-6JjgT&_nc_ht=scontent.fbsb3-1.fna&oh=8ca96d1d6f6c977f5ee4c33b8e990f35&oe=5F99A450'
+   });
+    const [showNewChat, setShowNewChat] = useState(false);
+
+    const handleNewChat = () => {
+        setShowNewChat(true);
+    }
+
+    const handleLoginData = async (u) => {
+        let newUser = {
+            id: u.uid,
+            name: u.displayName,
+            avatar: u.photoURL
+        };
+        await Api.addUser(newUser);
+        setUser(newUser);
+    }
+
+    if(user === null ) {
+        return (<Login onReceive={handleLoginData} />);
+    }
 
     return (
         <div className="app-window">
             <div className="sidebar">
-                
+                <NewChat  
+                    chatlist={chatlist}
+                    user={user}
+                    show={showNewChat}
+                    setShow={setShowNewChat}
+                />
                 <header>
                     <img className="header--avatar" src={user.avatar} alt="" />
                     <div className="header--buttons">
                         <div className="header--btn">
                             <DonutLargeIcon style={{color: '#919191'}} />
                         </div>
-                        <div className="header--btn">
+                        <div onClick={handleNewChat} className="header--btn">
                             <ChatIcon style={{color: '#919191'}} />
                         </div>
                         <div className="header--btn">
