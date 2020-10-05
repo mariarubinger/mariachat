@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import EmojiPicker from 'emoji-picker-react';
 import './ChatWindow.css';
 
+import Api from '../Api';
+
 import MessageItem from './MessageItem';
 
 import SearchIcon from '@material-ui/icons/Search';
@@ -12,7 +14,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import SendIcon from '@material-ui/icons/Send';
 import MicIcon from '@material-ui/icons/Mic';
 
-export default ({user}) => {
+export default ({user, data}) => {
 
     const body = useRef();
 
@@ -26,29 +28,15 @@ export default ({user}) => {
     const [emojiOpen, setEmojiOpen] = useState(false);
     const [text, setText] = useState(''); /* pra salvar o texto */
     const [listening, setListening] = useState(false);
-    const [list, setList] = useState([
-        {author:123, body:'Bom dia'},
-        {author:123, body:'Tudo bem?'},
-        {author:1234, body:'O que você vai fazer hoje?'},
-        {author:123, body:'Bom dia'},
-        {author:123, body:'Tudo bem?'},
-        {author:1234, body:'O que você vai fazer hoje?'},
-        {author:123, body:'Bom dia'},
-        {author:123, body:'Tudo bem?'},
-        {author:1234, body:'O que você vai fazer hoje?'},
-        {author:123, body:'Bom dia'},
-        {author:123, body:'Tudo bem?'},
-        {author:1234, body:'O que você vai fazer hoje?'},
-        {author:123, body:'Bom dia'},
-        {author:123, body:'Tudo bem?'},
-        {author:1234, body:'O que você vai fazer hoje?'},
-        {author:123, body:'Bom dia'},
-        {author:123, body:'Tudo bem?'},
-        {author:1234, body:'O que você vai fazer hoje?'},
-        {author:123, body:'Bom dia'},
-        {author:123, body:'Tudo bem?'},
-        {author:1234, body:'O que você vai fazer hoje?'},
-    ]);
+    const [list, setList] = useState([]);
+    const [users, setUsers] = useState([]);
+
+    useEffect(()=>{
+
+        setList([]);
+        let unsub = Api.onChatContent(data.chatId, setList, setUsers);
+        return unsub;
+    }, [data.chatId]);
 
     useEffect(()=>{
         if(body.current.scrollHeight > body.current.offsetHeight) {
@@ -57,7 +45,7 @@ export default ({user}) => {
     }, [list]);
 
     const handleEmojiClick = (e, emojiObject) => {
-        setText( text + emojiObject.emoji);
+        setText( text + emojiObject.emoji );
     }
 
     /* Sabe qual emoji foi clicado */
@@ -86,8 +74,18 @@ export default ({user}) => {
         }
     }
 
-    const handleSendClick = () => {
+    const handleInputKeyUp = (e) => {
+        if(e.keyCode == 13) {
+            handleSendClick();
+        }
+    }
 
+    const handleSendClick = () => {
+        if(text !== '') {   
+            Api.sendMessage(data, user.id, 'text', text, users);
+            setText('');
+            setEmojiOpen(false);
+        }
     }
 
     return (
@@ -95,8 +93,8 @@ export default ({user}) => {
 
             <div className="chatWindow--header">
                 <div className="chatWindow--headerinfo">
-                    <img className="chatWindow--avatar" src="https://www.w3schools.com/w3images/avatar5.png" alt="" />
-                    <div className="chatWindow--name">Maria Clara</div>
+                    <img className="chatWindow--avatar" src={data.image} alt="" />
+                    <div className="chatWindow--name">{data.title}</div>
                 </div>
 
                 <div className="chatWindow--headerbuttons">
@@ -163,6 +161,7 @@ export default ({user}) => {
                         placeholder="Digite uma mensagem"
                         value={text}
                         onChange={e=>setText(e.target.value)}
+                        onKeyUp={handleInputKeyUp}
                     />
                 </div>
                     

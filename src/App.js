@@ -18,13 +18,15 @@ export default () => {
 
     const [chatlist, setChatList] = useState([]);
     const [activeChat, setActiveChat] = useState({});
-   /*  const [user, setUser] = useState(null); */
-   const [user, setUser] = useState({
-        id: '4RdcdF6jINXsToURKoh9diWgcgC2',
-        name: 'Maria Clara Rubinger de Sousa',
-        avatar: 'https://scontent.fbsb3-1.fna.fbcdn.net/v/t1.0-9/106919151_4069551136451879_5607232725786716327_n.jpg?_nc_cat=100&_nc_sid=09cbfe&_nc_ohc=V8Q_4Kwe0QwAX-6JjgT&_nc_ht=scontent.fbsb3-1.fna&oh=8ca96d1d6f6c977f5ee4c33b8e990f35&oe=5F99A450'
-   });
+    const [user, setUser] = useState(null);
     const [showNewChat, setShowNewChat] = useState(false);
+    
+    useEffect(()=>{
+        if(user !== null) {
+            let unsub = Api.onChatList(user.id, setChatList);
+            return unsub;
+        }
+    }, [user]);
 
     const handleNewChat = () => {
         setShowNewChat(true);
@@ -91,6 +93,7 @@ export default () => {
                 {activeChat.chatId !== undefined &&
                     <ChatWindow
                         user={user}
+                        data={activeChat}
                     />
                 }
                 {activeChat.chatId === undefined &&
